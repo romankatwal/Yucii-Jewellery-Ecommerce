@@ -1,49 +1,60 @@
 'use strict';
 
+// Get product ID from URL
 const params = new URLSearchParams(window.location.search);
-const productId = params.get('id');
+const productId = params.get("id");
 
-const productImage = document.getElementById('product-image');
-const productCategory = document.getElementById('product-category');
-const productName = document.getElementById('product-name');
-const productPrice = document.getElementById('product-price');
-const productDescription = document.getElementById('product-description');
-const productStock = document.getElementById('product-stock');
+console.log("Product ID:", productId);
 
-async function loadProduct() {
+if (!productId) {
 
-    if (!productId) {
-        productName.textContent = 'Product not found';
-        return;
-    }
+    console.error("No product ID found in URL");
 
-    try {
+} else {
 
-        const response = await fetch(
-            `http://localhost:5000/api/products/${productId}`
-        );
+    fetch(`http://localhost:5000/api/products/${productId}`)
 
-        if (!response.ok) {
-            throw new Error('Product not found');
-        }
+        .then(response => {
 
-        const product = await response.json();
+            if (!response.ok) {
+                throw new Error("Product not found");
+            }
 
-        productImage.src = product.image;
-        productImage.alt = product.name;
+            return response.json();
 
-        productCategory.textContent = product.category;
-        productName.textContent = product.name;
-        productPrice.textContent = `Rs ${product.price}`;
-        productDescription.textContent = product.description;
-        productStock.textContent = product.stock;
+        })
 
-    } catch (error) {
+        .then(product => {
 
-        console.error(error);
-        productName.textContent = 'Unable to load product';
+            console.log("Product received:", product);
 
-    }
+            document.querySelector("#product-name").textContent =
+                product.name;
+
+            document.querySelector("#product-category").textContent =
+                product.category;
+
+            document.querySelector("#product-price").textContent =
+                `Rs ${product.price}`;
+
+            document.querySelector("#product-description").textContent =
+                product.description;
+
+            document.querySelector("#product-stock").textContent =
+                product.stock;
+
+            document.querySelector("#product-image").src =
+                product.image;
+
+            document.querySelector("#product-image").alt =
+                product.name;
+
+        })
+
+        .catch(error => {
+
+            console.error("Error loading product:", error);
+
+        });
+
 }
-
-loadProduct();
