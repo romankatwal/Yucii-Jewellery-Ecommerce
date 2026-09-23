@@ -12,6 +12,7 @@ if (!productId) {
 
 } else {
 
+    // Ask backend for this product
     fetch(`http://localhost:5000/api/products/${productId}`)
 
         .then(response => {
@@ -28,26 +29,53 @@ if (!productId) {
 
             console.log("Product received:", product);
 
-            document.querySelector("#product-name").textContent =
-                product.name;
+            // PRODUCT IMAGE
+            const image = document.getElementById("product-image");
 
-            document.querySelector("#product-category").textContent =
-                product.category;
+            if (image) {
+                image.src = product.image;
+                image.alt = product.name;
+            }
 
-            document.querySelector("#product-price").textContent =
-                `Rs ${product.price}`;
 
-            document.querySelector("#product-description").textContent =
-                product.description;
+            // PRODUCT CATEGORY
+            const category = document.getElementById("product-category");
 
-            document.querySelector("#product-stock").textContent =
-                product.stock;
+            if (category) {
+                category.textContent = product.category;
+            }
 
-            document.querySelector("#product-image").src =
-                product.image;
 
-            document.querySelector("#product-image").alt =
-                product.name;
+            // PRODUCT NAME
+            const name = document.getElementById("product-name");
+
+            if (name) {
+                name.textContent = product.name;
+            }
+
+
+            // PRODUCT PRICE
+            const price = document.getElementById("product-price");
+
+            if (price) {
+                price.textContent = `Rs ${product.price}`;
+            }
+
+
+            // PRODUCT DESCRIPTION
+            const description = document.getElementById("product-description");
+
+            if (description) {
+                description.textContent = product.description;
+            }
+
+
+            // PRODUCT STOCK
+            const stock = document.getElementById("product-stock");
+
+            if (stock) {
+                stock.textContent = product.stock;
+            }
 
         })
 

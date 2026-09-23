@@ -1,27 +1,43 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const db = require("./db");
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
 
-// ==========================================
-// HOME / TEST ROUTE
-// ==========================================
+// =====================================
+// FRONTEND
+// =====================================
+
+const frontendPath = path.join(__dirname, "../Yucii_ecommerce");
+
+console.log("Frontend path:", frontendPath);
+
+app.use(express.static(frontendPath));
+
+app.get("/product.html", (req, res) => {
+    res.sendFile(path.join(frontendPath, "product.html"));
+});
 
 app.get("/", (req, res) => {
+    res.sendFile(path.join(frontendPath, "index.html"));
+});
+
+
+// =====================================
+// API
+// =====================================
+
+app.get("/api", (req, res) => {
     res.send("Yucii Backend is running 🚀");
 });
 
 
-// ==========================================
 // GET ALL PRODUCTS
-// ==========================================
-
 app.get("/api/products", (req, res) => {
 
     const sql = "SELECT * FROM products";
@@ -29,7 +45,7 @@ app.get("/api/products", (req, res) => {
     db.query(sql, (err, results) => {
 
         if (err) {
-            console.error("Error fetching products:", err);
+            console.error("Database error:", err);
 
             return res.status(500).json({
                 message: "Failed to fetch products"
@@ -41,10 +57,7 @@ app.get("/api/products", (req, res) => {
 });
 
 
-// ==========================================
-// GET ONE PRODUCT BY ID
-// ==========================================
-
+// GET ONE PRODUCT
 app.get("/api/products/:id", (req, res) => {
 
     const productId = req.params.id;
@@ -54,14 +67,13 @@ app.get("/api/products/:id", (req, res) => {
     db.query(sql, [productId], (err, results) => {
 
         if (err) {
-            console.error("Error fetching product:", err);
+            console.error("Database error:", err);
 
             return res.status(500).json({
                 message: "Failed to fetch product"
             });
         }
 
-        // Product doesn't exist
         if (results.length === 0) {
 
             return res.status(404).json({
@@ -69,20 +81,18 @@ app.get("/api/products/:id", (req, res) => {
             });
         }
 
-        // Send the first matching product
         res.json(results[0]);
     });
 });
 
 
-// ==========================================
+// =====================================
 // START SERVER
-// ==========================================
+// =====================================
 
 const PORT = 5000;
 
 app.listen(PORT, () => {
-
     console.log(`Yucii Backend running on http://localhost:${PORT}`);
-
+    console.log(`Frontend available at http://localhost:${PORT}/`);
 });
