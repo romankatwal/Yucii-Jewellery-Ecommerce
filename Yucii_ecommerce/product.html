@@ -7,690 +7,67 @@
 
     <title>Yucii - Product</title>
 
-    <!-- Your existing CSS -->
     <link rel="stylesheet" href="./assets/css/style-prefix.css">
-
-    <!-- Google Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <style>
-
-        /* =========================================
-           GENERAL
-        ========================================= */
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: "Poppins", sans-serif;
-            background: #ffffff;
-            color: #222;
-        }
-
-        .product-page {
-            padding: 40px 0 80px;
-        }
-
-        .product-container {
-            width: 92%;
-            max-width: 1300px;
-            margin: auto;
-        }
-
-
-        /* =========================================
-           BREADCRUMB
-        ========================================= */
-
-        .breadcrumb {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 30px;
-            font-size: 14px;
-            color: #777;
-        }
-
-        .breadcrumb a {
-            color: #20b26b;
-            text-decoration: none;
-        }
-
-
-        /* =========================================
-           PRODUCT LAYOUT
-        ========================================= */
-
-        .product-detail {
-            display: grid;
-            grid-template-columns: 55% 45%;
-            gap: 50px;
-            align-items: start;
-        }
-
-
-        /* =========================================
-           IMAGE SECTION
-        ========================================= */
-
-        .product-image-section {
-            background: #f7f7f7;
-            border-radius: 8px;
-            padding: 25px;
-
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            min-height: 650px;
-        }
-
-        .product-image-section img {
-            width: 100%;
-            max-width: 650px;
-            height: 620px;
-
-            object-fit: contain;
-
-            display: block;
-
-            transition: transform 0.3s ease;
-        }
-
-        .product-image-section img:hover {
-            transform: scale(1.02);
-        }
-
-
-        /* =========================================
-           PRODUCT INFORMATION
-        ========================================= */
-
-        .product-info {
-            padding: 20px 10px;
-        }
-
-        .product-category {
-            color: #777;
-            font-size: 14px;
-            font-weight: 500;
-
-            text-transform: uppercase;
-            letter-spacing: 2px;
-
-            margin: 0 0 12px;
-        }
-
-        .product-name {
-            font-family: "Cormorant Garamond", serif;
-
-            font-size: 46px;
-            line-height: 1.15;
-
-            font-weight: 700;
-
-            margin: 0 0 20px;
-
-            color: #151515;
-        }
-
-
-        /* =========================================
-           RATING
-        ========================================= */
-
-        .product-rating {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-
-            margin-bottom: 20px;
-        }
-
-        .rating-box {
-            background: #20b26b;
-            color: white;
-
-            padding: 6px 12px;
-
-            border-radius: 5px;
-
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .rating-text {
-            color: #777;
-            font-size: 14px;
-        }
-
-
-        /* =========================================
-           PRICE
-        ========================================= */
-
-        .price-section {
-            padding: 20px 0;
-
-            border-top: 1px solid #eee;
-            border-bottom: 1px solid #eee;
-
-            margin-bottom: 25px;
-        }
-
-        .product-price {
-            color: #20b26b;
-
-            font-size: 32px;
-            font-weight: 700;
-
-            margin: 0;
-        }
-
-        .tax-text {
-            color: #777;
-            font-size: 13px;
-            margin-top: 5px;
-        }
-
-
-        /* =========================================
-           DESCRIPTION
-        ========================================= */
-
-        .description-title {
-            font-size: 18px;
-            font-weight: 600;
-
-            margin-bottom: 10px;
-        }
-
-        .product-description {
-            color: #666;
-
-            font-size: 15px;
-            line-height: 1.8;
-
-            margin-bottom: 25px;
-        }
-
-
-        /* =========================================
-           STOCK
-        ========================================= */
-
-        .stock-box {
-            background: #f4fbf7;
-
-            border-left: 4px solid #20b26b;
-
-            padding: 14px 16px;
-
-            margin-bottom: 25px;
-
-            border-radius: 4px;
-        }
-
-        .product-stock {
-            margin: 0;
-
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        #product-stock {
-            color: #20b26b;
-        }
-
-
-        /* =========================================
-           QUANTITY
-        ========================================= */
-
-        .quantity-title {
-            font-size: 15px;
-            font-weight: 600;
-
-            margin-bottom: 10px;
-        }
-
-        .quantity {
-            display: flex;
-            align-items: center;
-
-            margin-bottom: 25px;
-        }
-
-        .quantity button {
-            width: 45px;
-            height: 45px;
-
-            border: 1px solid #ddd;
-
-            background: white;
-
-            font-size: 22px;
-
-            cursor: pointer;
-
-            transition: 0.2s;
-        }
-
-        .quantity button:hover {
-            background: #20b26b;
-            color: white;
-            border-color: #20b26b;
-        }
-
-        .quantity span {
-            width: 55px;
-            height: 45px;
-
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            border-top: 1px solid #ddd;
-            border-bottom: 1px solid #ddd;
-
-            font-size: 17px;
-            font-weight: 600;
-        }
-
-
-        /* =========================================
-           BUTTONS
-        ========================================= */
-
-        .product-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .add-cart-btn,
-        .buy-now-btn {
-            height: 55px;
-
-            border-radius: 4px;
-
-            font-size: 16px;
-            font-weight: 600;
-
-            cursor: pointer;
-
-            transition: 0.3s;
-        }
-
-        .add-cart-btn {
-            background: #20b26b;
-            color: white;
-
-            border: 1px solid #20b26b;
-        }
-
-        .add-cart-btn:hover {
-            background: #168c52;
-            border-color: #168c52;
-        }
-
-        .buy-now-btn {
-            background: white;
-            color: #20b26b;
-
-            border: 1px solid #20b26b;
-        }
-
-        .buy-now-btn:hover {
-            background: #20b26b;
-            color: white;
-        }
-
-
-        /* =========================================
-           EXTRA INFORMATION
-        ========================================= */
-
-        .product-features {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-
-            gap: 15px;
-
-            margin-top: 30px;
-
-            padding-top: 25px;
-
-            border-top: 1px solid #eee;
-        }
-
-        .feature {
-            display: flex;
-            align-items: center;
-
-            gap: 10px;
-
-            color: #555;
-
-            font-size: 13px;
-        }
-
-        .feature-icon {
-            font-size: 20px;
-        }
-
-
-        /* =========================================
-           MOBILE
-        ========================================= */
-
-        @media (max-width: 900px) {
-
-            .product-detail {
-                grid-template-columns: 1fr;
-            }
-
-            .product-image-section {
-                min-height: auto;
-            }
-
-            .product-image-section img {
-                height: auto;
-                max-height: 600px;
-            }
-
-            .product-name {
-                font-size: 38px;
-            }
-
-        }
-
-
-        @media (max-width: 600px) {
-
-            .product-page {
-                padding: 25px 0 50px;
-            }
-
-            .product-container {
-                width: 94%;
-            }
-
-            .product-image-section {
-                padding: 10px;
-            }
-
-            .product-name {
-                font-size: 32px;
-            }
-
-            .product-price {
-                font-size: 27px;
-            }
-
-            .product-buttons {
-                grid-template-columns: 1fr;
-            }
-
-            .product-features {
-                grid-template-columns: 1fr;
-            }
-
-        }
-
-    </style>
-
 </head>
-
 
 <body>
 
-<main>
+    <main>
 
-<section class="product-page">
+        <section class="product-page">
 
-    <div class="product-container">
+            <div class="container">
 
-        <!-- =====================================
-             BREADCRUMB
-        ====================================== -->
+                <div class="product-detail">
 
-        <div class="breadcrumb">
+                    <div class="product-image-section">
+                        <img
+                            id="product-image"
+                            src="./assets/images/products/Necklace-1.jpg"
+                            alt="Product"
+                        >
+                    </div>
 
-            <a href="./index.html">Home</a>
+                    <div class="product-info">
 
-            <span>›</span>
-
-            <span id="breadcrumb-category">
-                Product
-            </span>
-
-            <span>›</span>
-
-            <span id="breadcrumb-name">
-                Details
-            </span>
-
-        </div>
-
-
-        <!-- =====================================
-             PRODUCT
-        ====================================== -->
-
-        <div class="product-detail">
-
-
-            <!-- =================================
-                 LEFT: PRODUCT IMAGE
-            ================================== -->
-
-            <div class="product-image-section">
-
-                <img
-                    id="product-image"
-                    src="./assets/images/products/Necklace-1.jpg"
-                    alt="Product"
-                >
-
-            </div>
-
-
-
-            <!-- =================================
-                 RIGHT: PRODUCT INFORMATION
-            ================================== -->
-
-            <div class="product-info">
-
-
-                <!-- CATEGORY -->
-
-                <p
-                    id="product-category"
-                    class="product-category"
-                >
-                    Loading...
-                </p>
-
-
-
-                <!-- NAME -->
-
-                <h1
-                    id="product-name"
-                    class="product-name"
-                >
-                    Loading product...
-                </h1>
-
-
-
-                <!-- RATING -->
-
-                <div class="product-rating">
-
-                    <span class="rating-box">
-                        ★ 4.8
-                    </span>
-
-                    <span class="rating-text">
-                        120 Reviews
-                    </span>
-
-                </div>
-
-
-
-                <!-- PRICE -->
-
-                <div class="price-section">
-
-                    <p
-                        id="product-price"
-                        class="product-price"
-                    >
-                        Loading...
-                    </p>
-
-                    <p class="tax-text">
-                        Inclusive of all taxes
-                    </p>
-
-                </div>
-
-
-
-                <!-- DESCRIPTION -->
-
-                <h3 class="description-title">
-                    Product Description
-                </h3>
-
-                <p
-                    id="product-description"
-                    class="product-description"
-                >
-                    Loading product description...
-                </p>
-
-
-
-                <!-- STOCK -->
-
-                <div class="stock-box">
-
-                    <p class="product-stock">
-
-                        Stock:
-
-                        <span id="product-stock">
+                        <p id="product-category" class="product-category">
                             Loading...
-                        </span>
+                        </p>
 
-                    </p>
+                        <h1 id="product-name" class="product-name">
+                            Loading product...
+                        </h1>
 
-                </div>
+                        <p id="product-price" class="product-price">
+                            Loading...
+                        </p>
 
+                        <p id="product-description" class="product-description">
+                            Loading product description...
+                        </p>
 
+                        <p class="product-stock">
+                            Stock:
+                            <span id="product-stock">Loading...</span>
+                        </p>
 
-                <!-- QUANTITY -->
+                        <div class="quantity">
 
-                <p class="quantity-title">
-                    Quantity
-                </p>
+                            <button id="decrease-btn">−</button>
 
-                <div class="quantity">
+                            <span id="quantity">1</span>
 
-                    <button id="decrease-btn">
-                        −
-                    </button>
+                            <button id="increase-btn">+</button>
 
-                    <span id="quantity">
-                        1
-                    </span>
+                        </div>
 
-                    <button id="increase-btn">
-                        +
-                    </button>
+                        <button class="add-cart-btn">
+                            Add to Cart
+                        </button>
 
-                </div>
-
-
-
-                <!-- BUTTONS -->
-
-                <div class="product-buttons">
-
-                    <button class="add-cart-btn">
-                        🛒 Add to Cart
-                    </button>
-
-                    <button class="buy-now-btn">
-                        Buy Now
-                    </button>
-
-                </div>
-
-
-
-                <!-- FEATURES -->
-
-                <div class="product-features">
-
-                    <div class="feature">
-
-                        <span class="feature-icon">
-                            🚚
-                        </span>
-
-                        <span>
-                            Fast Delivery
-                        </span>
-
-                    </div>
-
-
-                    <div class="feature">
-
-                        <span class="feature-icon">
-                            🔒
-                        </span>
-
-                        <span>
-                            Secure Payment
-                        </span>
-
-                    </div>
-
-
-                    <div class="feature">
-
-                        <span class="feature-icon">
-                            ✨
-                        </span>
-
-                        <span>
-                            Premium Quality
-                        </span>
-
-                    </div>
-
-
-                    <div class="feature">
-
-                        <span class="feature-icon">
-                            ↩
-                        </span>
-
-                        <span>
-                            Easy Returns
-                        </span>
+                        <button class="buy-now-btn">
+                            Buy Now
+                        </button>
 
                     </div>
 
@@ -698,20 +75,12 @@
 
             </div>
 
-        </div>
+        </section>
 
-    </div>
+         </main>
 
-</section>
-
-</main>
-
-
-<!-- =========================================
-     JAVASCRIPT
-========================================= -->
-
-<script src="./assets/js/product.js"></script>
+    <!-- JavaScript -->
+    <script src="./assets/js/product.js"></script>
 
 </body>
 
