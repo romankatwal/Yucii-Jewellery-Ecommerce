@@ -450,3 +450,48 @@ if (productImage) {
     );
 
 }
+/* =========================================
+   IMAGE GALLERY
+========================================= */
+
+const thumbnails =
+    document.querySelectorAll(".thumbnail");
+
+const mainProductImage =
+    document.getElementById("product-image");
+
+
+thumbnails.forEach(thumbnail => {
+
+    thumbnail.addEventListener("click", () => {
+
+        const image =
+            thumbnail.querySelector("img");
+
+        if (!image || !mainProductImage) {
+            return;
+        }
+
+
+        // Change main image
+
+        mainProductImage.src =
+            image.src;
+
+
+        // Remove active border
+
+        thumbnails.forEach(item => {
+
+            item.classList.remove("active");
+
+        });
+
+
+        // Add active border
+
+        thumbnail.classList.add("active");
+
+    });
+
+});

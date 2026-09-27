@@ -316,7 +316,7 @@
 }
 
 
-/* =========================================
+/* ===========================================
    MOBILE
 ========================================= */
 
@@ -342,4 +342,50 @@
         flex-direction: column;
     }
 
+}
+/* =========================================
+   PRODUCT IMAGE GALLERY
+========================================= */
+
+.thumbnail-list {
+    width: 80px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 15px;
+}
+
+
+.thumbnail {
+    width: 70px;
+    height: 80px;
+
+    padding: 4px;
+
+    background: white;
+
+    border: 1px solid #ddd;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.thumbnail img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+}
+
+
+.thumbnail:hover {
+    border-color: #315c45;
+}
+
+
+.thumbnail.active {
+    border: 2px solid #315c45;
 }
