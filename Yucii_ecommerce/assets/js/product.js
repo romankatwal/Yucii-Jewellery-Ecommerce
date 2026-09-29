@@ -89,54 +89,6 @@ if (!productId) {
 
             console.log("Product received:", product);
 
-/* =========================================
-   STOCK BAR
-========================================= */
-
-const stockBar =
-    document.getElementById("stock-bar-fill");
-
-if (stockBar) {
-
-    const stockPercentage =
-        Math.min(
-            (availableStock / 50) * 100,
-            100
-        );
-
-    stockBar.style.width =
-        `${stockPercentage}%`;
-}
-
-
-/* =========================================
-   PINCODE
-========================================= */
-
-const checkPincode =
-    document.getElementById("check-pincode");
-
-if (checkPincode) {
-
-    checkPincode.addEventListener("click", () => {
-
-        const pincode =
-            document.getElementById("pincode").value.trim();
-
-        if (!/^\d{6}$/.test(pincode)) {
-
-            alert("Please enter a valid 6-digit pincode.");
-
-            return;
-        }
-
-        alert(
-            `Delivery availability checked for ${pincode}.`
-        );
-
-    });
-
-}
 
             /* =================================
                PRODUCT NAME
@@ -402,43 +354,71 @@ if (increaseButton) {
 
 if (addCartButton) {
 
-    addCartButton.addEventListener(
-        "click",
-        () => {
+    addCartButton.addEventListener("click", () => {
 
-            if (!productId) {
+        if (!productId) {
+            return;
+        }
+
+        if (availableStock <= 0) {
+            alert("This product is out of stock.");
+            return;
+        }
+
+        // Get existing cart
+        let cart = JSON.parse(
+            localStorage.getItem("yuciiCart")
+        ) || [];
+
+        // Check if product already exists
+        const existingItem = cart.find(
+            item => String(item.productId) === String(productId)
+        );
+
+        if (existingItem) {
+
+            // Increase existing quantity
+            if (
+                existingItem.quantity + quantity
+                <= availableStock
+            ) {
+
+                existingItem.quantity += quantity;
+
+            } else {
+
+                alert(
+                    `Only ${availableStock} item(s) available in stock.`
+                );
+
                 return;
             }
 
-            if (availableStock <= 0) {
+        } else {
 
-                alert("This product is out of stock.");
-                return;
-
-            }
-
-            const cartItem = {
-
+            // Add new product
+            cart.push({
                 productId: productId,
-
                 quantity: quantity
-
-            };
-
-            console.log(
-                "Added to cart:",
-                cartItem
-            );
-
-            alert(
-                `Added ${quantity} item(s) to cart!`
-            );
+            });
 
         }
-    );
+
+        // Save cart
+        localStorage.setItem(
+            "yuciiCart",
+            JSON.stringify(cart)
+        );
+
+        console.log("Yucii Cart:", cart);
+
+        alert(
+            `Added ${quantity} item(s) to cart!`
+        );
+
+    });
 
 }
-
 
 /* =========================================
    BUY NOW
