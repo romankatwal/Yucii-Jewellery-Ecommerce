@@ -495,3 +495,140 @@ thumbnails.forEach(thumbnail => {
     });
 
 });
+/* =========================================
+   RELATED PRODUCTS
+========================================= */
+
+const relatedProductsGrid =
+    document.getElementById("related-products-grid");
+
+
+function loadRelatedProducts() {
+
+    if (!relatedProductsGrid) {
+        return;
+    }
+
+
+    fetch("http://localhost:5000/api/products")
+
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error(
+                    "Failed to load products"
+                );
+            }
+
+            return response.json();
+
+        })
+
+
+        .then(products => {
+
+            console.log(
+                "All products:",
+                products
+            );
+
+
+            // Remove current product
+
+            const relatedProducts =
+                products.filter(product =>
+                    String(product.id) !==
+                    String(productId)
+                );
+
+
+            // Clear the container
+
+            relatedProductsGrid.innerHTML = "";
+
+
+            // Create cards
+
+            relatedProducts.forEach(product => {
+
+                const card =
+                    document.createElement("div");
+
+                card.className =
+                    "related-card";
+
+
+                card.innerHTML = `
+
+                    <a
+                        href="product.html?id=${product.id}"
+                    >
+
+                        <div class="related-image">
+
+                            <img
+                                src="${product.image}"
+                                alt="${product.name}"
+                            >
+
+                        </div>
+
+                    </a>
+
+
+                    <div class="related-info">
+
+                        <div class="related-category">
+
+                            ${product.category || ""}
+
+                        </div>
+
+
+                        <a
+                            href="product.html?id=${product.id}"
+                        >
+
+                            <h3 class="related-name">
+
+                                ${product.name}
+
+                            </h3>
+
+                        </a>
+
+
+                        <div class="related-price">
+
+                            Rs ${Number(product.price).toFixed(2)}
+
+                        </div>
+
+                    </div>
+
+                `;
+
+
+                relatedProductsGrid.appendChild(card);
+
+            });
+
+        })
+
+
+        .catch(error => {
+
+            console.error(
+                "Error loading related products:",
+                error
+            );
+
+            relatedProductsGrid.innerHTML =
+                "<p>Unable to load related products.</p>";
+
+        });
+
+}
+
+
+loadRelatedProducts();
