@@ -2816,7 +2816,7 @@
 
               <p class="testimonial-title">CEO & Founder Invision</p>
 
-              <img src="./assets/images/icons/quotes.svg" alt="quotation" class="quotation-img" width="26">
+          
 
               <p class="testimonial-desc">
                Yuciii is a jewellery brand offering elegant 
@@ -3384,6 +3384,88 @@
   -->
   <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    fetch("/api/products")
+        .then(response => response.json())
+        .then(products => {
+
+            const cards = document.querySelectorAll(".showcase");
+
+            cards.forEach(card => {
+
+                const titleElement = card.querySelector(".showcase-title");
+                const imageElement = card.querySelector(".showcase-img");
+
+                if (!titleElement || !imageElement) return;
+
+                const title = titleElement.textContent.trim();
+                const image = imageElement.getAttribute("src");
+
+                const imageName = image.split("/").pop();
+
+                // Find matching product from database
+                const product = products.find(p => {
+
+                    if (!p.image) return false;
+
+                    const dbImageName =
+                        p.image.split("/").pop();
+
+                    return (
+                        dbImageName === imageName ||
+                        p.name.trim().toLowerCase() ===
+                        title.toLowerCase()
+                    );
+                });
+
+                if (!product) return;
+
+                const productURL =
+                    `product.html?id=${product.id}`;
+
+                // Make image clickable
+                const imageLink =
+                    card.querySelector(".showcase-img-box");
+
+                if (imageLink) {
+                    imageLink.href = productURL;
+                }
+
+                // Make product name clickable
+                const titleLink =
+                    titleElement.closest("a");
+
+                if (titleLink) {
+                    titleLink.href = productURL;
+                }
+
+                // Make entire card clickable
+                card.style.cursor = "pointer";
+
+                card.addEventListener("click", (event) => {
+
+                    // Don't interfere with existing links
+                    if (event.target.closest("a")) return;
+
+                    window.location.href = productURL;
+                });
+
+            });
+
+        })
+        .catch(error => {
+            console.error(
+                "Product linking error:",
+                error
+            );
+        });
+
+});
+</script>
+
 
 </body>
 

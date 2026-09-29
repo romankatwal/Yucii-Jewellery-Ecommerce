@@ -89,6 +89,54 @@ if (!productId) {
 
             console.log("Product received:", product);
 
+/* =========================================
+   STOCK BAR
+========================================= */
+
+const stockBar =
+    document.getElementById("stock-bar-fill");
+
+if (stockBar) {
+
+    const stockPercentage =
+        Math.min(
+            (availableStock / 50) * 100,
+            100
+        );
+
+    stockBar.style.width =
+        `${stockPercentage}%`;
+}
+
+
+/* =========================================
+   PINCODE
+========================================= */
+
+const checkPincode =
+    document.getElementById("check-pincode");
+
+if (checkPincode) {
+
+    checkPincode.addEventListener("click", () => {
+
+        const pincode =
+            document.getElementById("pincode").value.trim();
+
+        if (!/^\d{6}$/.test(pincode)) {
+
+            alert("Please enter a valid 6-digit pincode.");
+
+            return;
+        }
+
+        alert(
+            `Delivery availability checked for ${pincode}.`
+        );
+
+    });
+
+}
 
             /* =================================
                PRODUCT NAME
