@@ -1,0 +1,126 @@
+services:
+
+  # =====================================
+  # MYSQL DATABASE
+  # =====================================
+
+  mysql:
+
+    image: mysql:8.0
+
+    container_name: yucii-mysql
+
+    restart: unless-stopped
+
+    environment:
+
+      MYSQL_ROOT_PASSWORD: rootpassword
+
+      MYSQL_DATABASE: yucii_db
+
+      MYSQL_USER: yucii_user
+
+      MYSQL_PASSWORD: yucii_password
+
+    ports:
+
+      - "3306:3306"
+
+    volumes:
+
+      - mysql_data:/var/lib/mysql
+
+    healthcheck:
+
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-prootpassword"
+        ]
+
+      interval: 10s
+
+      timeout: 5s
+
+      retries: 10
+
+
+  # =====================================
+  # NODE.JS BACKEND
+  # =====================================
+
+  backend:
+
+    build:
+
+      context: .
+
+      dockerfile: Dockerfile.backend
+
+    container_name: yucii-backend
+
+    restart: unless-stopped
+
+    depends_on:
+
+      mysql:
+
+        condition: service_healthy
+
+    environment:
+
+      DB_HOST: mysql
+
+      DB_USER: yucii_user
+
+      DB_PASSWORD: yucii_password
+
+      DB_NAME: yucii_db
+
+      DB_PORT: 3306
+
+      PORT: 5000
+
+    ports:
+
+      - "5000:5000"
+
+
+  # =====================================
+  # NGINX FRONTEND
+  # =====================================
+
+  frontend:
+
+    build:
+
+      context: .
+
+      dockerfile: Dockerfile.frontend
+
+    container_name: yucii-frontend
+
+    restart: unless-stopped
+
+    depends_on:
+
+      - backend
+
+    ports:
+
+      - "80:80"
+
+
+# =====================================
+# MYSQL PERSISTENT STORAGE
+# =====================================
+
+volumes:
+
+  mysql_data:
