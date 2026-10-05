@@ -316,20 +316,19 @@ if (!addCartButton) {
     card.appendChild(addCartButton);
 }
 
-addCartButton.onclick = (event) => {
+addCartButton.addEventListener("click", function (event) {
     event.preventDefault();
     event.stopPropagation();
 
-    // Get the current cart
     let cart = JSON.parse(localStorage.getItem("yuciiCart")) || [];
 
-    // Check if THIS exact product is already in cart
-    const existingItem = cart.find(
+    // Find THIS exact product
+    const existingProduct = cart.find(
         item => String(item.productId) === String(product.id)
     );
 
-    if (existingItem) {
-        existingItem.quantity += 1;
+    if (existingProduct) {
+        existingProduct.quantity += 1;
     } else {
         cart.push({
             productId: product.id,
@@ -337,16 +336,9 @@ addCartButton.onclick = (event) => {
         });
     }
 
-    // Save updated cart
     localStorage.setItem("yuciiCart", JSON.stringify(cart));
 
     alert(`${product.name} added to cart!`);
 
-    console.log("🛒 Added product:", {
-        id: product.id,
-        name: product.name,
-        quantity: existingItem
-            ? existingItem.quantity
-            : 1
-    });
-};
+    console.log("🛒 Cart:", cart);
+});
