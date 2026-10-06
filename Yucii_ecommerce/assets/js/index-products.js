@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     fetch("/api/products")
-
         .then(response => {
 
             if (!response.ok) {
@@ -16,41 +15,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
             console.log("Database products:", products);
 
-
             function normalize(text) {
-
                 return (text || "")
                     .toLowerCase()
                     .replace(/\s+/g, " ")
                     .trim();
-
             }
-
 
             const cards =
                 document.querySelectorAll(".showcase");
-
 
             console.log(
                 "Total showcase cards:",
                 cards.length
             );
 
-
             cards.forEach(card => {
 
                 const titleElement =
                     card.querySelector(".showcase-title");
 
-
                 if (!titleElement) {
                     return;
                 }
 
-
                 const title =
                     normalize(titleElement.textContent);
-
 
                 /*
                 ======================================
@@ -63,71 +53,33 @@ document.addEventListener("DOMContentLoaded", () => {
                         ".showcase-img, .product-img.default"
                     );
 
-
                 let imageName = "";
-
 
                 if (imageElement) {
 
                     const imageSrc =
                         imageElement.getAttribute("src") || "";
 
-
                     imageName =
                         imageSrc
                             .split("/")
                             .pop()
                             .toLowerCase();
-
                 }
-
 
                 /*
                 ======================================
-                GET CURRENT PRICE
+                FIND PRODUCT
                 ======================================
                 */
 
-                const priceElement =
-                    card.querySelector(".price");
-
-
-                let price = "";
-
-
-                if (priceElement) {
-
-                    price =
-                        priceElement.textContent
-                            .replace(/[^\d.]/g, "");
-
-                }
-
-
-                /*
-                ======================================
-                1. MATCH NAME FIRST
-                ======================================
-                */
-
+                // 1. Match by product name
                 let product =
-                    products.find(p => {
+                    products.find(p =>
+                        normalize(p.name) === title
+                    );
 
-                        return (
-                            normalize(p.name) ===
-                            title
-                        );
-
-                    });
-
-
-                /*
-                ======================================
-                2. IF NAME DOESN'T MATCH,
-                   MATCH IMAGE
-                ======================================
-                */
-
+                // 2. If name doesn't match, match by image
                 if (!product && imageName) {
 
                     product =
@@ -137,23 +89,15 @@ document.addEventListener("DOMContentLoaded", () => {
                                 return false;
                             }
 
-
                             const dbImageName =
                                 p.image
                                     .split("/")
                                     .pop()
                                     .toLowerCase();
 
-
-                            return (
-                                dbImageName ===
-                                imageName
-                            );
-
+                            return dbImageName === imageName;
                         });
-
                 }
-
 
                 /*
                 ======================================
@@ -170,9 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     );
 
                     return;
-
                 }
-
 
                 /*
                 ======================================
@@ -183,24 +125,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 const productURL =
                     `product.html?id=${product.id}`;
 
-
                 /*
                 ======================================
                 IMAGE LINK
                 ======================================
                 */
-const imageLink =
-    card.querySelector(
-        ".showcase-img-box, .showcase-banner"
-    );
+
+                const imageLink =
+                    card.querySelector(
+                        ".showcase-img-box, .showcase-banner"
+                    );
 
                 if (imageLink) {
-
-                    imageLink.href =
-                        productURL;
-
+                    imageLink.href = productURL;
                 }
-
 
                 /*
                 ======================================
@@ -211,14 +149,9 @@ const imageLink =
                 const titleLink =
                     titleElement.closest("a");
 
-
                 if (titleLink) {
-
-                    titleLink.href =
-                        productURL;
-
+                    titleLink.href = productURL;
                 }
-
 
                 /*
                 ======================================
@@ -226,34 +159,105 @@ const imageLink =
                 ======================================
                 */
 
-                card.style.cursor =
-                    "pointer";
+                card.style.cursor = "pointer";
 
+                card.addEventListener("click", event => {
 
-                card.addEventListener(
-                    "click",
-                    event => {
+                    // Don't navigate when clicking links
+                    if (event.target.closest("a")) {
+                        return;
+                    }
 
-                        if (
-                            event.target.closest("a")
-                        ) {
-                            return;
-                        }
+                    // Don't navigate when clicking buttons
+                    if (event.target.closest("button")) {
+                        return;
+                    }
 
+                    window.location.href = productURL;
+                });
 
-                        if (
-                            event.target.closest("button")
-                        ) {
-                            return;
-                        }
+                /*
+                ======================================
+                ADD TO CART BUTTON
+                ======================================
+                */
 
+                let addCartButton =
+                    card.querySelector(".homepage-add-cart");
 
-                        window.location.href =
-                            productURL;
+                if (!addCartButton) {
+
+                    addCartButton =
+                        document.createElement("button");
+
+                    addCartButton.className =
+                        "homepage-add-cart";
+
+                    addCartButton.textContent =
+                        "ADD TO CART";
+
+                    card.appendChild(addCartButton);
+                }
+
+                /*
+                ======================================
+                ADD THIS EXACT PRODUCT TO CART
+                ======================================
+                */
+
+                addCartButton.onclick = event => {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    let cart =
+                        JSON.parse(
+                            localStorage.getItem("yuciiCart")
+                        ) || [];
+
+                    /*
+                    Find THIS product using its database ID
+                    */
+
+                    const existingProduct =
+                        cart.find(item =>
+                            String(item.productId) ===
+                            String(product.id)
+                        );
+
+                    if (existingProduct) {
+
+                        existingProduct.quantity += 1;
+
+                    } else {
+
+                        cart.push({
+                            productId: product.id,
+                            quantity: 1
+                        });
 
                     }
-                );
 
+                    /*
+                    Save cart
+                    */
+
+                    localStorage.setItem(
+                        "yuciiCart",
+                        JSON.stringify(cart)
+                    );
+
+                    console.log(
+                        "🛒 Added:",
+                        product.name,
+                        "ID:",
+                        product.id
+                    );
+
+                    alert(
+                        `${product.name} added to cart!`
+                    );
+                };
 
                 console.log(
                     "✅ LINKED:",
@@ -266,7 +270,6 @@ const imageLink =
 
         })
 
-
         .catch(error => {
 
             console.error(
@@ -276,69 +279,4 @@ const imageLink =
 
         });
 
-});
-
-/* ======================================
-   ADD TO CART BUTTON
-====================================== */
-
-let addCartButton =
-    card.querySelector(".homepage-add-cart");
-
-
-if (!addCartButton) {
-
-    addCartButton =
-        document.createElement("button");
-
-    addCartButton.className =
-        "homepage-add-cart";
-
-    addCartButton.textContent =
-        "ADD TO CART";
-
-
-    card.appendChild(addCartButton);
-
-}
-
-
-/* ======================================
-   ADD TO CART
-====================================== */
-
-let addCartButton = card.querySelector(".homepage-add-cart");
-
-if (!addCartButton) {
-    addCartButton = document.createElement("button");
-    addCartButton.className = "homepage-add-cart";
-    addCartButton.textContent = "ADD TO CART";
-    card.appendChild(addCartButton);
-}
-
-addCartButton.addEventListener("click", function (event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    let cart = JSON.parse(localStorage.getItem("yuciiCart")) || [];
-
-    // Find THIS exact product
-    const existingProduct = cart.find(
-        item => String(item.productId) === String(product.id)
-    );
-
-    if (existingProduct) {
-        existingProduct.quantity += 1;
-    } else {
-        cart.push({
-            productId: product.id,
-            quantity: 1
-        });
-    }
-
-    localStorage.setItem("yuciiCart", JSON.stringify(cart));
-
-    alert(`${product.name} added to cart!`);
-
-    console.log("🛒 Cart:", cart);
 });
