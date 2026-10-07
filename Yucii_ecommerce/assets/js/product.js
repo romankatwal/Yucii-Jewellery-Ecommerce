@@ -14,12 +14,23 @@ console.log("Product ID:", productId);
    ELEMENTS
 ========================================= */
 
-const productName = document.getElementById("product-name");
-const productCategory = document.getElementById("product-category");
-const productPrice = document.getElementById("product-price");
-const productDescription = document.getElementById("product-description");
-const productStock = document.getElementById("product-stock");
-const productImage = document.getElementById("product-image");
+const productName =
+    document.getElementById("product-name");
+
+const productCategory =
+    document.getElementById("product-category");
+
+const productPrice =
+    document.getElementById("product-price");
+
+const productDescription =
+    document.getElementById("product-description");
+
+const productStock =
+    document.getElementById("product-stock");
+
+const productImage =
+    document.getElementById("product-image");
 
 const breadcrumbCategory =
     document.getElementById("breadcrumb-category");
@@ -84,7 +95,6 @@ if (!productId) {
             return response.json();
         })
 
-
         .then(product => {
 
             console.log("Product received:", product);
@@ -139,7 +149,6 @@ if (!productId) {
 
                 productPrice.textContent =
                     `Rs ${price}`;
-
             }
 
 
@@ -152,7 +161,6 @@ if (!productId) {
                 productDescription.textContent =
                     product.description ||
                     "No description available.";
-
             }
 
 
@@ -164,6 +172,7 @@ if (!productId) {
                 Number(product.stock) || 0;
 
             if (productStock) {
+
                 productStock.textContent =
                     availableStock;
             }
@@ -175,9 +184,11 @@ if (!productId) {
 
             if (productImage && product.image) {
 
-                productImage.src = product.image;
-                productImage.alt = product.name;
+                productImage.src =
+                    product.image;
 
+                productImage.alt =
+                    product.name;
             }
 
 
@@ -188,6 +199,7 @@ if (!productId) {
             quantity = 1;
 
             if (quantityDisplay) {
+
                 quantityDisplay.textContent =
                     quantity;
             }
@@ -200,6 +212,7 @@ if (!productId) {
             if (availableStock <= 0) {
 
                 if (productStock) {
+
                     productStock.textContent =
                         "Out of stock";
 
@@ -208,19 +221,26 @@ if (!productId) {
                 }
 
                 if (addCartButton) {
+
                     addCartButton.disabled = true;
+
                     addCartButton.textContent =
                         "Out of Stock";
+
                     addCartButton.style.opacity =
                         "0.6";
+
                     addCartButton.style.cursor =
                         "not-allowed";
                 }
 
                 if (buyNowButton) {
+
                     buyNowButton.disabled = true;
+
                     buyNowButton.style.opacity =
                         "0.6";
+
                     buyNowButton.style.cursor =
                         "not-allowed";
                 }
@@ -242,15 +262,9 @@ if (!productId) {
                     productStock.style.color =
                         "#d98c00";
                 }
-
             }
 
         })
-
-
-        /* =====================================
-           ERROR
-        ===================================== */
 
         .catch(error => {
 
@@ -265,13 +279,11 @@ if (!productId) {
             }
 
             if (productCategory) {
-                productCategory.textContent =
-                    "";
+                productCategory.textContent = "";
             }
 
             if (productPrice) {
-                productPrice.textContent =
-                    "";
+                productPrice.textContent = "";
             }
 
             if (productDescription) {
@@ -302,7 +314,6 @@ if (decreaseButton) {
                     quantityDisplay.textContent =
                         quantity;
                 }
-
             }
 
         }
@@ -354,71 +365,129 @@ if (increaseButton) {
 
 if (addCartButton) {
 
-    addCartButton.addEventListener("click", () => {
+    addCartButton.addEventListener(
+        "click",
+        () => {
 
-        if (!productId) {
-            return;
-        }
+            /* -------------------------------
+               CHECK PRODUCT
+            ------------------------------- */
 
-        if (availableStock <= 0) {
-            alert("This product is out of stock.");
-            return;
-        }
+            if (!productId) {
+                return;
+            }
 
-        // Get existing cart
-        let cart = JSON.parse(
-            localStorage.getItem("yuciiCart")
-        ) || [];
 
-        // Check if product already exists
-        const existingItem = cart.find(
-            item => String(item.productId) === String(productId)
-        );
+            /* -------------------------------
+               CHECK STOCK
+            ------------------------------- */
 
-        if (existingItem) {
-
-            // Increase existing quantity
-            if (
-                existingItem.quantity + quantity
-                <= availableStock
-            ) {
-
-                existingItem.quantity += quantity;
-
-            } else {
+            if (availableStock <= 0) {
 
                 alert(
-                    `Only ${availableStock} item(s) available in stock.`
+                    "This product is out of stock."
                 );
 
                 return;
             }
 
-        } else {
 
-            // Add new product
-            cart.push({
-                productId: productId,
-                quantity: quantity
-            });
+            /* -------------------------------
+               GET EXISTING CART
+            ------------------------------- */
+
+            let cart =
+                JSON.parse(
+                    localStorage.getItem("yuciiCart")
+                ) || [];
+
+
+            /* -------------------------------
+               FIND THIS EXACT PRODUCT
+            ------------------------------- */
+
+            const existingItem =
+                cart.find(
+                    item =>
+                        String(item.productId) ===
+                        String(productId)
+                );
+
+
+            /* -------------------------------
+               PRODUCT ALREADY IN CART
+            ------------------------------- */
+
+            if (existingItem) {
+
+                const newQuantity =
+                    existingItem.quantity +
+                    quantity;
+
+
+                if (newQuantity > availableStock) {
+
+                    alert(
+                        `Only ${availableStock} item(s) available in stock.`
+                    );
+
+                    return;
+                }
+
+
+                existingItem.quantity =
+                    newQuantity;
+
+            }
+
+
+            /* -------------------------------
+               NEW PRODUCT
+            ------------------------------- */
+
+            else {
+
+                cart.push({
+                    productId: productId,
+                    quantity: quantity
+                });
+
+            }
+
+
+            /* -------------------------------
+               SAVE COMPLETE CART
+            ------------------------------- */
+
+            localStorage.setItem(
+                "yuciiCart",
+                JSON.stringify(cart)
+            );
+
+
+            console.log(
+                "🛒 Product added:",
+                productId
+            );
+
+            console.log(
+                "🛒 Complete cart:",
+                cart
+            );
+
+
+            /* -------------------------------
+               GO TO CART PAGE
+            ------------------------------- */
+
+            window.location.href =
+                "cart.html";
 
         }
-
-        // Save cart
-        localStorage.setItem(
-            "yuciiCart",
-            JSON.stringify(cart)
-        );
-
-        console.log("Yucii Cart:", cart);
-
-        alert(
-            `Added ${quantity} item(s) to cart!`
-        );
-
-    });
+    );
 
 }
+
 
 /* =========================================
    BUY NOW
@@ -436,9 +505,11 @@ if (buyNowButton) {
 
             if (availableStock <= 0) {
 
-                alert("This product is out of stock.");
-                return;
+                alert(
+                    "This product is out of stock."
+                );
 
+                return;
             }
 
             console.log(
@@ -478,6 +549,8 @@ if (productImage) {
     );
 
 }
+
+
 /* =========================================
    IMAGE GALLERY
 ========================================= */
@@ -491,44 +564,51 @@ const mainProductImage =
 
 thumbnails.forEach(thumbnail => {
 
-    thumbnail.addEventListener("click", () => {
+    thumbnail.addEventListener(
+        "click",
+        () => {
 
-        const image =
-            thumbnail.querySelector("img");
+            const image =
+                thumbnail.querySelector("img");
 
-        if (!image || !mainProductImage) {
-            return;
+            if (!image || !mainProductImage) {
+                return;
+            }
+
+
+            /* Change main image */
+
+            mainProductImage.src =
+                image.src;
+
+
+            /* Remove active border */
+
+            thumbnails.forEach(item => {
+
+                item.classList.remove("active");
+
+            });
+
+
+            /* Add active border */
+
+            thumbnail.classList.add("active");
+
         }
-
-
-        // Change main image
-
-        mainProductImage.src =
-            image.src;
-
-
-        // Remove active border
-
-        thumbnails.forEach(item => {
-
-            item.classList.remove("active");
-
-        });
-
-
-        // Add active border
-
-        thumbnail.classList.add("active");
-
-    });
+    );
 
 });
+
+
 /* =========================================
    RELATED PRODUCTS
 ========================================= */
 
 const relatedProductsGrid =
-    document.getElementById("related-products-grid");
+    document.getElementById(
+        "related-products-grid"
+    );
 
 
 function loadRelatedProducts() {
@@ -543,15 +623,16 @@ function loadRelatedProducts() {
         .then(response => {
 
             if (!response.ok) {
+
                 throw new Error(
                     "Failed to load products"
                 );
+
             }
 
             return response.json();
 
         })
-
 
         .then(products => {
 
@@ -561,21 +642,28 @@ function loadRelatedProducts() {
             );
 
 
-            // Remove current product
+            /* -------------------------------
+               REMOVE CURRENT PRODUCT
+            ------------------------------- */
 
             const relatedProducts =
-                products.filter(product =>
-                    String(product.id) !==
-                    String(productId)
+                products.filter(
+                    product =>
+                        String(product.id) !==
+                        String(productId)
                 );
 
 
-            // Clear the container
+            /* -------------------------------
+               CLEAR CONTAINER
+            ------------------------------- */
 
             relatedProductsGrid.innerHTML = "";
 
 
-            // Create cards
+            /* -------------------------------
+               CREATE RELATED CARDS
+            ------------------------------- */
 
             relatedProducts.forEach(product => {
 
@@ -642,7 +730,6 @@ function loadRelatedProducts() {
             });
 
         })
-
 
         .catch(error => {
 
