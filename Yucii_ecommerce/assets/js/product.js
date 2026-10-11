@@ -100,27 +100,27 @@ if (!productId) {
             console.log("Product received:", product);
 
 
-            /* =================================
+            /*
                PRODUCT NAME
-            ================================= */
+           */
 
             if (productName) {
                 productName.textContent = product.name;
             }
 
 
-            /* =================================
+            /* 
                PRODUCT CATEGORY
-            ================================= */
+           */
 
             if (productCategory) {
                 productCategory.textContent = product.category;
             }
 
 
-            /* =================================
+            /* 
                BREADCRUMB CATEGORY
-            ================================= */
+             */
 
             if (breadcrumbCategory) {
                 breadcrumbCategory.textContent =
@@ -364,54 +364,110 @@ if (increaseButton) {
 ========================================= */
 
 if (addCartButton) {
+    addCartButton.addEventListener("click", () => {
 
-    addCartButton.addEventListener(
-        "click",
-        () => {
+        // Check product ID
+        if (!productId) {
+            alert("Product not found.");
+            return;
+        }
 
-            /* -------------------------------
-               CHECK PRODUCT
-            ------------------------------- */
+        // Check stock
+        if (availableStock <= 0) {
+            alert("This product is out of stock.");
+            return;
+        }
 
-            if (!productId) {
-                return;
+        // Get existing cart
+        let cart = [];
+
+        try {
+            cart = JSON.parse(
+                localStorage.getItem("yuciiCart") || "[]"
+            );
+
+            if (!Array.isArray(cart)) {
+                cart = [];
             }
+        } catch (error) {
+            console.error("Could not read cart:", error);
+            alert("Unable to open your cart. Please try again.");
+            return;
+        }
 
+        // Find this exact product
+        const existingItem = cart.find(
+            item => String(item.productId) === String(productId)
+        );
 
-            /* -------------------------------
-               CHECK STOCK
-            ------------------------------- */
+        if (existingItem) {
+            const currentQuantity = Number(existingItem.quantity) || 0;
+            const newQuantity = currentQuantity + quantity;
 
-            if (availableStock <= 0) {
-
+            if (newQuantity > availableStock) {
                 alert(
-                    "This product is out of stock."
+                    `Only ${availableStock} item(s) available in stock.`
                 );
-
                 return;
             }
 
+            existingItem.quantity = newQuantity;
 
-            /* -------------------------------
-               GET EXISTING CART
-            ------------------------------- */
-
-            let cart =
-                JSON.parse(
-                    localStorage.getItem("yuciiCart")
-                ) || [];
-
-
-            /* -------------------------------
-               FIND THIS EXACT PRODUCT
-            ------------------------------- */
-
-            const existingItem =
-                cart.find(
-                    item =>
-                        String(item.productId) ===
-                        String(productId)
+        } else {
+            if (quantity > availableStock) {
+                alert(
+                    `Only ${availableStock} item(s) available in stock.`
                 );
+                return;
+            }
+
+            cart.push({
+                productId: productId,
+                quantity: quantity
+            });
+        }
+
+        // Save before navigating
+        localStorage.setItem(
+            "yuciiCart",
+            JSON.stringify(cart)
+        );
+
+        console.log("Yucii cart:", cart);
+
+        // Open cart page
+        window.location.href = "cart.html";
+    });
+}
+
+
+/* =========================================
+   BUY NOW
+========================================= */
+
+if (buyNowButton) {
+    buyNowButton.addEventListener("click", () => {
+
+        if (!productId) {
+            alert("Product not found.");
+            return;
+        }
+
+        if (availableStock <= 0) {
+            alert("This product is out of stock.");
+            return;
+        }
+
+        console.log("Buy Now:", {
+            productId: productId,
+            quantity: quantity
+        });
+
+        alert(
+            `Proceeding to checkout with ${quantity} item(s).`
+        );
+    });
+}
 
 
             /* -------------------------------

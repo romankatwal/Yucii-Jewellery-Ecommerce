@@ -196,7 +196,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     addCartButton.textContent =
                         "ADD TO CART";
 
-                    card.appendChild(addCartButton);
+                 const buttonContainer =
+    card.querySelector(".showcase-content") ||
+    card.querySelector(".showcase-details") ||
+    card;
+
+buttonContainer.appendChild(addCartButton);
                 }
 
                 /*
