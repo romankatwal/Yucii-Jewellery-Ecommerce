@@ -3,17 +3,27 @@
 
 document.addEventListener("DOMContentLoaded", loadCart);
 
-/* =========================================
-   CART HELPERS
-========================================= */
+const CART_KEY = "yuciiCart";
+const API_URL = "/api/products";
 
 function getCart() {
     try {
-        const savedCart = JSON.parse(
-            localStorage.getItem("yuciiCart") || "[]"
+        const cart = JSON.parse(
+            localStorage.getItem(CART_KEY) || "[]"
         );
 
-        return Array.isArray(savedCart) ? savedCart : [];
+        if (!Array.isArray(cart)) return [];
+
+        return cart
+            .filter(item =>
+                item &&
+                item.productId != null &&
+                Number(item.quantity) > 0
+            )
+            .map(item => ({
+                ...item,
+                quantity: Math.floor(Number(item.quantity))
+            }));
     } catch (error) {
         console.error("Unable to read cart:", error);
         return [];
@@ -21,37 +31,66 @@ function getCart() {
 }
 
 function saveCart(cart) {
-    localStorage.setItem("yuciiCart", JSON.stringify(cart));
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
 }
 
-/* =========================================
-   LOAD CART
-========================================= */
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[char]);
+}
+
+function getImageURL(image) {
+    if (!image) return "";
+
+    const path = String(image).trim();
+
+    if (/^(https?:\/\/|data:image\/)/i.test(path)) {
+        return path;
+    }
+
+    return "/" + path.replace(/^\/+/, "");
+}
+
+function formatPrice(price) {
+    return "Rs " + Number(price).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
 
 async function loadCart() {
-    const cartContent = document.getElementById("cart-content");
+    const container = document.getElementById("cart-content");
 
-    if (!cartContent) return;
+    if (!container) return;
 
     const cart = getCart();
 
     if (cart.length === 0) {
-        showEmptyCart(cartContent);
+        showEmptyCart(container);
         return;
     }
 
-    cartContent.innerHTML = "<p>Loading your cart...</p>";
+    container.innerHTML = "<p>Loading your cart...</p>";
 
     try {
-        const response = await fetch("/api/products");
+        const response = await fetch(API_URL);
 
         if (!response.ok) {
-            throw new Error("Could not load products.");
+            throw new Error("Products API returned " + response.status);
         }
 
         const products = await response.json();
 
-        // Keep only valid cart items.
+        if (!Array.isArray(products)) {
+            throw new Error("Invalid products response.");
+        }
+
+        // Remove entries whose products no longer exist.
         const validCart = cart.filter(item =>
             products.some(product =>
                 String(product.id) === String(item.productId)
@@ -63,30 +102,25 @@ async function loadCart() {
         }
 
         if (validCart.length === 0) {
-            showEmptyCart(cartContent);
+            showEmptyCart(container);
             return;
         }
 
-        renderCart(cartContent, validCart, products);
+        renderCart(container, validCart, products);
 
     } catch (error) {
         console.error("Cart loading error:", error);
 
-        cartContent.innerHTML = `
-            <div class="empty-cart">
-                <p>Unable to load your cart.</p>
-                <button class="continue-shopping"
-                    onclick="loadCart()">
-                    Try Again
-                </button>
+        container.innerHTML = `
+            <div class="cart-message">
+                <p>Unable to load your products.</p>
+                <p>Check that your backend is running, then try again.</p>
+                <button type="button" class="continue-shopping"
+                    onclick="loadCart()">Try Again</button>
             </div>
         `;
     }
 }
-
-/* =========================================
-   EMPTY CART
-========================================= */
 
 function showEmptyCart(container) {
     container.innerHTML = `
@@ -99,12 +133,9 @@ function showEmptyCart(container) {
     `;
 }
 
-/* =========================================
-   RENDER CART
-========================================= */
-
 function renderCart(container, cart, products) {
     let subtotal = 0;
+    let itemCount = 0;
 
     const itemsHTML = cart.map((item, index) => {
         const product = products.find(product =>
@@ -113,70 +144,54 @@ function renderCart(container, cart, products) {
 
         if (!product) return "";
 
-        const quantity = Math.max(
-            1,
-            Number(item.quantity) || 1
-        );
-
-        const price = Number(product.price) || 0;
+        const quantity = Math.max(1, Number(item.quantity) || 1);
+        const price = Math.max(0, Number(product.price) || 0);
         const stock = Math.max(0, Number(product.stock) || 0);
         const itemTotal = price * quantity;
 
         subtotal += itemTotal;
+        itemCount += quantity;
 
-        // Support both relative paths and full image URLs.
-        const imagePath = product.image || "";
-        const imageURL = /^https?:\/\//i.test(imagePath)
-            ? imagePath
-            : imagePath
-                ? `/${imagePath.replace(/^\.?\//, "")}`
-                : "";
+        const imageURL = getImageURL(product.image);
 
         return `
             <article class="cart-item">
                 <img
                     src="${escapeHTML(imageURL)}"
-                    alt="${escapeHTML(product.name)}"
+                    alt="${escapeHTML(product.name || "Product")}"
                     onerror="this.style.visibility='hidden'"
                 >
 
                 <div class="cart-item-info">
                     <h3 class="cart-item-name">
-                        ${escapeHTML(product.name)}
+                        ${escapeHTML(product.name || "Unnamed product")}
                     </h3>
 
                     <div class="cart-item-price">
-                        Rs ${price.toFixed(2)}
+                        ${formatPrice(price)} each
                     </div>
 
                     <div class="quantity-controls">
-                        <button
-                            type="button"
+                        <button type="button"
                             aria-label="Decrease quantity"
                             onclick="decreaseQuantity(${index})"
-                            ${quantity <= 1 ? "disabled" : ""}
-                        >−</button>
+                            ${quantity <= 1 ? "disabled" : ""}>−</button>
 
                         <span>${quantity}</span>
 
-                        <button
-                            type="button"
+                        <button type="button"
                             aria-label="Increase quantity"
                             onclick="increaseQuantity(${index})"
-                            ${quantity >= stock ? "disabled" : ""}
-                        >+</button>
+                            ${quantity >= stock ? "disabled" : ""}>+</button>
                     </div>
 
                     <p class="cart-line-total">
-                        Item total: Rs ${itemTotal.toFixed(2)}
+                        Item total: ${formatPrice(itemTotal)}
                     </p>
 
-                    <button
-                        type="button"
-                        class="remove-btn"
-                        onclick="removeItem(${index})"
-                    >
-                        Remove
+                    <button type="button" class="remove-btn"
+                        onclick="removeItem(${index})">
+                        Remove item
                     </button>
                 </div>
             </article>
@@ -193,8 +208,13 @@ function renderCart(container, cart, products) {
                 <h2>Order Summary</h2>
 
                 <div class="summary-row">
+                    <span>Items (${itemCount})</span>
+                    <span>${itemCount}</span>
+                </div>
+
+                <div class="summary-row">
                     <span>Subtotal</span>
-                    <span>Rs ${subtotal.toFixed(2)}</span>
+                    <span>${formatPrice(subtotal)}</span>
                 </div>
 
                 <div class="summary-row">
@@ -204,21 +224,15 @@ function renderCart(container, cart, products) {
 
                 <div class="summary-row total-row">
                     <span>Total</span>
-                    <span>Rs ${subtotal.toFixed(2)}</span>
+                    <span>${formatPrice(subtotal)}</span>
                 </div>
 
-                <button
-                    type="button"
-                    class="checkout-btn"
-                    onclick="checkout()"
-                >
+                <button type="button" class="checkout-btn"
+                    onclick="checkout()">
                     PROCEED TO CHECKOUT
                 </button>
 
-                <a
-                    href="index.html"
-                    class="continue-shopping"
-                >
+                <a href="index.html" class="continue-shopping">
                     Continue Shopping
                 </a>
             </aside>
@@ -226,34 +240,16 @@ function renderCart(container, cart, products) {
     `;
 }
 
-/* =========================================
-   SAFE TEXT
-========================================= */
-
-function escapeHTML(value) {
-    return String(value ?? "").replace(/[&<>"']/g, character => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-    })[character]);
-}
-
-/* =========================================
-   UPDATE QUANTITY
-========================================= */
-
 async function updateQuantity(index, change) {
     const cart = getCart();
 
     if (!cart[index]) return;
 
     try {
-        const response = await fetch("/api/products");
+        const response = await fetch(API_URL);
 
         if (!response.ok) {
-            throw new Error("Could not verify product stock.");
+            throw new Error("Could not verify stock.");
         }
 
         const products = await response.json();
@@ -298,10 +294,6 @@ function decreaseQuantity(index) {
     updateQuantity(index, -1);
 }
 
-/* =========================================
-   REMOVE PRODUCT
-========================================= */
-
 function removeItem(index) {
     const cart = getCart();
 
@@ -312,10 +304,6 @@ function removeItem(index) {
 
     loadCart();
 }
-
-/* =========================================
-   CHECKOUT PLACEHOLDER
-========================================= */
 
 function checkout() {
     alert("Checkout will be implemented in the next step.");
