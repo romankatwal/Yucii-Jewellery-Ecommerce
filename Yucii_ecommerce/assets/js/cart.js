@@ -1,11 +1,12 @@
 
 "use strict";
 
-document.addEventListener("DOMContentLoaded", loadCart);
-
 const CART_KEY = "yuciiCart";
 const API_URL = "/api/products";
 
+document.addEventListener("DOMContentLoaded", loadCart);
+
+// Read cart safely
 function getCart() {
     try {
         const cart = JSON.parse(
@@ -18,11 +19,12 @@ function getCart() {
             .filter(item =>
                 item &&
                 item.productId != null &&
+                Number.isInteger(Number(item.quantity)) &&
                 Number(item.quantity) > 0
             )
             .map(item => ({
                 ...item,
-                quantity: Math.floor(Number(item.quantity))
+                quantity: Number(item.quantity)
             }));
     } catch (error) {
         console.error("Unable to read cart:", error);
@@ -34,6 +36,7 @@ function saveCart(cart) {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
 }
 
+// Escape text before inserting it into HTML
 function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, char => ({
         "&": "&amp;",
@@ -44,25 +47,57 @@ function escapeHTML(value) {
     })[char]);
 }
 
+// Support URLs and local product image paths
 function getImageURL(image) {
     if (!image) return "";
 
-    const path = String(image).trim();
+    const path = String(image).trim().replace(/\\/g, "/");
 
     if (/^(https?:\/\/|data:image\/)/i.test(path)) {
         return path;
     }
 
-    return "/" + path.replace(/^\/+/, "");
+    const cleanPath = path.replace(/^\.\/+/, "");
+
+    if (cleanPath.startsWith("/")) {
+        return cleanPath;
+    }
+
+    if (cleanPath.startsWith("assets/")) {
+        return "/" + cleanPath;
+    }
+
+    return "/assets/images/products/" + cleanPath;
 }
 
 function formatPrice(price) {
-    return "Rs " + Number(price).toLocaleString("en-IN", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
+    const amount = Number(price);
+
+    return "Rs " + (Number.isFinite(amount) ? amount : 0)
+        .toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
 }
 
+// Fetch all products from your existing backend
+async function fetchProducts() {
+    const response = await fetch(API_URL);
+
+    if (!response.ok) {
+        throw new Error("Products API returned " + response.status);
+    }
+
+    const products = await response.json();
+
+    if (!Array.isArray(products)) {
+        throw new Error("Invalid products response.");
+    }
+
+    return products;
+}
+
+// Load cart page
 async function loadCart() {
     const container = document.getElementById("cart-content");
 
@@ -78,19 +113,8 @@ async function loadCart() {
     container.innerHTML = "<p>Loading your cart...</p>";
 
     try {
-        const response = await fetch(API_URL);
+        const products = await fetchProducts();
 
-        if (!response.ok) {
-            throw new Error("Products API returned " + response.status);
-        }
-
-        const products = await response.json();
-
-        if (!Array.isArray(products)) {
-            throw new Error("Invalid products response.");
-        }
-
-        // Remove entries whose products no longer exist.
         const validCart = cart.filter(item =>
             products.some(product =>
                 String(product.id) === String(item.productId)
@@ -114,14 +138,18 @@ async function loadCart() {
         container.innerHTML = `
             <div class="cart-message">
                 <p>Unable to load your products.</p>
-                <p>Check that your backend is running, then try again.</p>
-                <button type="button" class="continue-shopping"
-                    onclick="loadCart()">Try Again</button>
+                <p>Check that your backend is running.</p>
+                <button type="button"
+                    class="continue-shopping"
+                    onclick="loadCart()">
+                    Try Again
+                </button>
             </div>
         `;
     }
 }
 
+// Empty cart
 function showEmptyCart(container) {
     container.innerHTML = `
         <div class="empty-cart">
@@ -133,6 +161,7 @@ function showEmptyCart(container) {
     `;
 }
 
+// Render products and order summary
 function renderCart(container, cart, products) {
     let subtotal = 0;
     let itemCount = 0;
@@ -144,7 +173,7 @@ function renderCart(container, cart, products) {
 
         if (!product) return "";
 
-        const quantity = Math.max(1, Number(item.quantity) || 1);
+        const quantity = Number(item.quantity);
         const price = Math.max(0, Number(product.price) || 0);
         const stock = Math.max(0, Number(product.stock) || 0);
         const itemTotal = price * quantity;
@@ -175,21 +204,32 @@ function renderCart(container, cart, products) {
                         <button type="button"
                             aria-label="Decrease quantity"
                             onclick="decreaseQuantity(${index})"
-                            ${quantity <= 1 ? "disabled" : ""}>−</button>
+                            ${quantity <= 1 ? "disabled" : ""}>
+                            −
+                        </button>
 
                         <span>${quantity}</span>
 
                         <button type="button"
                             aria-label="Increase quantity"
                             onclick="increaseQuantity(${index})"
-                            ${quantity >= stock ? "disabled" : ""}>+</button>
+                            ${quantity >= stock ? "disabled" : ""}>
+                            +
+                        </button>
                     </div>
 
                     <p class="cart-line-total">
                         Item total: ${formatPrice(itemTotal)}
                     </p>
 
-                    <button type="button" class="remove-btn"
+                    ${quantity > stock ? `
+                        <p style="color:#a33b35">
+                            Only ${stock} item(s) currently in stock.
+                        </p>
+                    ` : ""}
+
+                    <button type="button"
+                        class="remove-btn"
                         onclick="removeItem(${index})">
                         Remove item
                     </button>
@@ -208,7 +248,7 @@ function renderCart(container, cart, products) {
                 <h2>Order Summary</h2>
 
                 <div class="summary-row">
-                    <span>Items (${itemCount})</span>
+                    <span>Items</span>
                     <span>${itemCount}</span>
                 </div>
 
@@ -227,7 +267,8 @@ function renderCart(container, cart, products) {
                     <span>${formatPrice(subtotal)}</span>
                 </div>
 
-                <button type="button" class="checkout-btn"
+                <button type="button"
+                    class="checkout-btn"
                     onclick="checkout()">
                     PROCEED TO CHECKOUT
                 </button>
@@ -240,19 +281,14 @@ function renderCart(container, cart, products) {
     `;
 }
 
+// Update quantity and verify stock against MySQL
 async function updateQuantity(index, change) {
     const cart = getCart();
 
     if (!cart[index]) return;
 
     try {
-        const response = await fetch(API_URL);
-
-        if (!response.ok) {
-            throw new Error("Could not verify stock.");
-        }
-
-        const products = await response.json();
+        const products = await fetchProducts();
 
         const product = products.find(item =>
             String(item.id) === String(cart[index].productId)
@@ -265,8 +301,7 @@ async function updateQuantity(index, change) {
         }
 
         const stock = Math.max(0, Number(product.stock) || 0);
-        const currentQuantity = Number(cart[index].quantity) || 1;
-        const newQuantity = currentQuantity + change;
+        const newQuantity = cart[index].quantity + change;
 
         if (newQuantity < 1) return;
 
@@ -294,6 +329,7 @@ function decreaseQuantity(index) {
     updateQuantity(index, -1);
 }
 
+// Remove one item
 function removeItem(index) {
     const cart = getCart();
 
@@ -305,6 +341,7 @@ function removeItem(index) {
     loadCart();
 }
 
+// Placeholder until checkout is implemented
 function checkout() {
     alert("Checkout will be implemented in the next step.");
 }
