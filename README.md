@@ -216,6 +216,6 @@ The objective of Yucii is to develop a functional jewellery e-commerce platform 
 
 Yucii is under active development. Core frontend pages, backend API routes, database connectivity, and shopping cart functionality have been developed. Product listing integration, product-specific loading, checkout, and final testing remain ongoing tasks.
 
-## 📄 License
 
-A license has not yet been specified. Add an appropriate license before distributing the project for reuse.
+
+
