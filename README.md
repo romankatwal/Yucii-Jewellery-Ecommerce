@@ -37,7 +37,7 @@ The application is being developed using HTML, CSS, JavaScript, Node.js, Express
 | Express.js | Backend server and REST API |
 | MySQL | Relational database |
 | mysql2 | MySQL database connectivity |
-| Local Storage | Shopping cart persistence |
+| Local Storage | Shopping cart persistence|
 
 ## 📁 Project Structure
 
