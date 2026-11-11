@@ -11,7 +11,7 @@ console.log("Product ID:", productId);
 
 
 /* =========================================
-   ELEMENTS
+ELEMENTSb
 ========================================= */
 
 const productName = document.getElementById("product-name");
